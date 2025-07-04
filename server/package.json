@@ -1,0 +1,45 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "backend for car washing cars",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx --watch ./src/main.ts"
+  },
+  "git": {
+    "url": "https://github.com/HugoSpecial/CarWashBooking"
+  },
+  "keywords": [
+    "car",
+    "washing"
+  ],
+  "author": [
+    "Hugo Pereira",
+    "Hugo Especial"
+  ],
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "http-status-codes": "^2.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.1",
+    "morgan": "^1.10.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
