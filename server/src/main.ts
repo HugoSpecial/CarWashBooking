@@ -1,6 +1,6 @@
 import MongoService from "./infrastructure/db/connection.js";
 import ExpressServer from "./infrastructure/http/ExpressServer.js";
-import "./types/express";
+//import "./types/express";
 
 /**
  * Initialize server
