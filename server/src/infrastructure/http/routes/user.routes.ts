@@ -20,4 +20,8 @@ userRouter.post('/logout', (req, res) => userController.logout(req, res));
 
 userRouter.get('/users', checkAuthentication, (req, res) => userController.findAll(req, res));
 
+userRouter.get('/users/update-profile', checkAuthentication, (req, res) => userController.updateProfile(req, res));
+
+userRouter.get('/users/update-password', checkAuthentication, (req, res) => userController.updatePassword(req, res));
+
 export default userRouter;

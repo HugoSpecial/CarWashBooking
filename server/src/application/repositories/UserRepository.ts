@@ -25,6 +25,16 @@ class UserRepository {
 
     return users;
   }
+
+  public async update(userId: string, updateData: Partial<UserDocument>): Promise<UserDocument | null> {
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    return updatedUser;
+  }
 }
 
 export default UserRepository;

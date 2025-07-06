@@ -1,7 +1,7 @@
 import { Application } from "express";
 import cors, { CorsOptions } from "cors";
 
-const ACCEPTED_ORIGINS = ['http://localhost:3000', 'carwashbooking.vercel.app'];
+const ACCEPTED_ORIGINS = ['http://localhost:5173', 'carwashbooking.vercel.app'];
 const ACCEPTED_METHODS = ['POST', 'GET', 'DELETE', 'PUT', 'PATCH']
 
 function setupCors(app: Application) {

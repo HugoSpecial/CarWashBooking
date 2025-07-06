@@ -1,18 +1,18 @@
 import { UserDocument } from "../../infrastructure/db/models/user.model.js";
-import { CreateUserDTO } from "../dtos/UserDTOs.js";
+import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTOs.js";
 import UserRepository from "../repositories/UserRepository.js";
-import bcrypt from "bcrypt";
+import { compare, hash } from "bcrypt";
 
 class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   public async create(data: CreateUserDTO): Promise<UserDocument> {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await hash(data.password, 10);
 
     const user = await this.userRepository.save({
       ...data,
-      password: hashedPassword
-    })
+      password: hashedPassword,
+    });
 
     return user;
   }
@@ -33,6 +33,33 @@ class UserService {
     const users = await this.userRepository.findAll();
 
     return users;
+  }
+
+  public async updateProfile(
+    userId: string,
+    data: UpdateUserDTO
+  ): Promise<UserDocument | null> {
+    return await this.userRepository.update(userId, data);
+  }
+
+  public async changePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string
+  ): Promise<UserDocument | null> {
+    const user = await this.userRepository.findById(userId);
+
+    if (!user) throw new Error("Invalid email");
+
+    const isMatch = await compare(oldPassword, user.password);
+
+    if (!isMatch) throw new Error("Old password is incorrect");
+
+    const hashedPassword = await hash(newPassword, 10);
+
+    return await this.userRepository.update(userId, {
+      password: hashedPassword,
+    });
   }
 }
 
