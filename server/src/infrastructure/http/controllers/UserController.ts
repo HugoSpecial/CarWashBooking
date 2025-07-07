@@ -1,21 +1,23 @@
-import { Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
-import bcrypt from "bcrypt";
+import { NextFunction, Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 import {
   CreateUserDTO,
   LoginUserDTO,
   UpdatePasswordDTO,
   UpdateUserDTO,
-} from "../../../application/dtos/UserDTOs.js";
-import UserService from "../../../application/services/UserService.js";
-import { createAccessToken } from "../security/jwt.js";
-import setTokenCookie from "../security/cookies.js";
+} from '../../../application/dtos/UserDTOs.js';
+import UserService from '../../../application/services/UserService.js';
+import setTokenCookie from '../security/cookies.js';
 
 class UserController {
   constructor(private readonly userService: UserService) {}
 
-  public async create(req: Request, res: Response): Promise<void> {
+  public async create(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const data = req.body as CreateUserDTO;
 
     try {
@@ -23,77 +25,59 @@ class UserController {
 
       res.status(StatusCodes.OK).json(user);
     } catch (error) {
-      console.error("Error occurred while creating an user.", error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Error occurred while creating an user.",
-      });
+      next(error);
     }
   }
 
-  public async login(req: Request, res: Response): Promise<void> {
+  public async login(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const data = req.body as LoginUserDTO;
 
     try {
-      const userExists = await this.userService.findByEmail(data.email);
-
-      if (!userExists) throw new Error("Invalid email");
-
-      const passwordMatch = await bcrypt.compare(
-        data.password,
-        userExists.password
-      );
-
-      if (!passwordMatch) throw new Error("Incorret password");
-
-      const accessToken = createAccessToken(userExists);
+      const accessToken = await this.userService.login(data);
 
       setTokenCookie(accessToken, res);
 
-      res.status(StatusCodes.OK).json({ message: "Login successful" });
+      res.status(StatusCodes.OK).json({ message: 'Login successful' });
     } catch (error: any) {
-      console.error("Error occurred while logging in.", error);
-
-      if (error instanceof Error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          message: error.message,
-        });
-      } else {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          message: "Error occurred while logging in.",
-        });
-      }
+      next(error);
     }
   }
 
-  public async findAll(_: Request, res: Response): Promise<void> {
+  public async findAll(
+    _req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const users = await this.userService.findAll();
 
       res.status(StatusCodes.OK).json(users);
     } catch (error) {
-      console.error("Error occurred while obtaining all users.", error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Error occurred while obtaining all users.",
-      });
+      next(error);
     }
   }
 
-  public async logout(_: Request, res: Response): Promise<void> {
+  public logout(_req: Request, res: Response, next: NextFunction): void {
     try {
-      res.clearCookie("accessToken");
+      res.clearCookie('accessToken');
 
       res.status(StatusCodes.OK).json({
-        message: "Logout successful",
+        message: 'Logout successful',
       });
     } catch (error) {
-      console.error("Error occurred while logging out.", error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Error occurred while logging out",
-      });
+      next(error);
     }
   }
 
-  public async updateProfile(req: Request, res: Response): Promise<void> {
+  public async updateProfile(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const userId = req.user!.userId;
 
     const { name, email, photo } = req.body as UpdateUserDTO;
@@ -107,23 +91,15 @@ class UserController {
 
       res.status(StatusCodes.OK).json(updatedUser);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error occurred while updating profile.", error);
-
-        if (error instanceof Error) {
-          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            message: error.message,
-          });
-        } else {
-          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            message: "Error occurred while updating profile",
-          });
-        }
-      }
+      next(error);
     }
   }
 
-  public async updatePassword(req: Request, res: Response): Promise<void> {
+  public async updatePassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const userId = req.user!.userId;
 
     const { oldPassword, newPassword } = req.body as UpdatePasswordDTO;
@@ -131,21 +107,9 @@ class UserController {
     try {
       await this.userService.changePassword(userId, oldPassword, newPassword);
 
-      res.status(StatusCodes.OK).json({ message: "Password updated." });
+      res.status(StatusCodes.OK).json({ message: 'Password updated.' });
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error occurred while updating password.", error);
-
-        if (error instanceof Error) {
-          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            message: error.message,
-          });
-        } else {
-          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            message: "Error occurred while updating password",
-          });
-        }
-      }
+      next(error);
     }
   }
 }

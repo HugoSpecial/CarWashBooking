@@ -1,23 +1,24 @@
-import MongoService from "./infrastructure/db/connection.js";
-import ExpressServer from "./infrastructure/http/ExpressServer.js";
+import MongoService from './infrastructure/db/connection.js';
+import ExpressServer from './infrastructure/http/ExpressServer.js';
+import logger from './infrastructure/logger/winstonLogger.js';
 //import "./types/express";
 
 /**
  * Initialize server
  */
-async function main () {
-  try { 
+async function main() {
+  try {
     const mongoDb = new MongoService();
 
     await mongoDb.connect();
 
     const server = new ExpressServer(mongoDb);
 
-    server.listen()
+    server.listen();
   } catch (error) {
-    console.error('Error occurred:', error);
+    logger.error('An unexpected error occurred: ', error);
     process.exit(1);
   }
 }
 
-main();
+void main();

@@ -1,4 +1,8 @@
-import mongoose, { Connection, MongooseError } from "mongoose";
+import mongoose, { Connection, MongooseError } from 'mongoose';
+
+import logger from '../logger/winstonLogger.js';
+import AppError from '../errors/AppError.js';
+import { StatusCodes } from 'http-status-codes';
 
 class MongoService {
   private connection: Connection | null = null;
@@ -11,37 +15,40 @@ class MongoService {
 
   public async connect(): Promise<void> {
     if (this.isConnected()) {
-      console.warn("MongoDB already connected");
+      logger.warn('MongoDB already connected');
       return;
     }
 
     const url = process.env.MONGO_URL;
 
     if (!url) {
-      throw new Error("MONGO_URL environment variable is not set");
+      throw new AppError(
+        'MONGO_URL environment variable is not set',
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
     }
 
     try {
-      mongoose.connection.on("connected", () => {
+      mongoose.connection.on('connected', () => {
         this.connected = true;
-        console.info("Conected to MongoDB");
+        logger.info('Conected to MongoDB');
       });
 
-      mongoose.connection.on("error", (error: MongooseError) => {
-        console.error("Error connecting to MongoDB", error);
+      mongoose.connection.on('error', (error: MongooseError) => {
+        logger.error('Error connecting to MongoDB', error);
         throw error;
       });
 
-      mongoose.connection.on("disconnected", () => {
+      mongoose.connection.on('disconnected', () => {
         this.connected = false;
-        console.warn("MongoDB connection lost");
+        logger.warn('MongoDB connection lost');
       });
 
       await mongoose.connect(url);
 
       this.connection = mongoose.connection;
     } catch (error) {
-      console.error("MongoDB connection failed", error);
+      logger.error('MongoDB connection failed', error);
       throw error;
     }
   }
@@ -53,9 +60,9 @@ class MongoService {
       this.connected = false;
       this.connection = null;
 
-      console.info("MongoDB connection closed");
+      logger.info('MongoDB connection closed');
     } catch (error) {
-      console.error("Failed to close connection");
+      logger.error('Failed to close connection');
       throw error;
     }
   }

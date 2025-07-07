@@ -1,5 +1,7 @@
-import UserModel, { UserDocument } from "../../infrastructure/db/models/user.model.js";
-import { CreateUserDTO } from "../dtos/UserDTOs.js";
+import UserModel, {
+  UserDocument,
+} from '../../infrastructure/db/models/user.model.js';
+import { CreateUserDTO } from '../dtos/UserDTOs.js';
 
 class UserRepository {
   public async save(data: CreateUserDTO): Promise<UserDocument> {
@@ -9,7 +11,7 @@ class UserRepository {
   }
 
   public async findByEmail(email: string): Promise<UserDocument | null> {
-    const user = UserModel.findOne({ email: email })
+    const user = UserModel.findOne({ email: email });
 
     return user;
   }
@@ -26,12 +28,14 @@ class UserRepository {
     return users;
   }
 
-  public async update(userId: string, updateData: Partial<UserDocument>): Promise<UserDocument | null> {
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      userId,
-      updateData,
-      { new: true, runValidators: true }
-    );
+  public async update(
+    userId: string,
+    updateData: Partial<UserDocument>,
+  ): Promise<UserDocument | null> {
+    const updatedUser = await UserModel.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     return updatedUser;
   }

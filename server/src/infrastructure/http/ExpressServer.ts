@@ -1,12 +1,15 @@
-import express, { Application, json, Router, Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import express, { Application, json, Router } from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
 import setupMorgan from '../setup/setupMorgan.js';
 import setupCors from '../setup/setupCors.js';
+import SetupHealthCheck from '../setup/SetupHealthCheck.js';
 import MongoService from '../db/connection.js';
 import userRouter from './routes/user.routes.js';
+import setupLogger from '../setup/setupLogger.js';
+import errorHandler from './middlewares/error.middleware.js';
+import logger from '../logger/winstonLogger.js';
 
 process.loadEnvFile();
 
@@ -23,7 +26,7 @@ class ExpressServer {
 
     this.app.disable('x-powered-by');
 
-    this.mongoConnectionHandler = mongoHandler || new MongoService()
+    this.mongoConnectionHandler = mongoHandler || new MongoService();
 
     this.initMiddlewares();
 
@@ -40,22 +43,26 @@ class ExpressServer {
     setupMorgan(this.app);
 
     setupCors(this.app);
+
+    setupLogger(this.app);
+
+    this.app.use(errorHandler);
   }
 
   private initRoutes() {
     const router = Router();
 
-    router.get('/health-check', (_: Request, res: Response) => {
-      res.status(StatusCodes.OK).send('Hello World!');
-    })
+    const healthMonitoring = new SetupHealthCheck(this.mongoConnectionHandler);
 
-    this.app.use(router, userRouter);
+    router.get('/health-check', healthMonitoring.check.bind(healthMonitoring));
+
+    this.app.use('/api/v1', router, userRouter);
   }
 
   public listen() {
     this.app.listen(process.env.PORT, () => {
-      console.log('Server running')
-    })
+      logger.info('Server running');
+    });
   }
 }
 
