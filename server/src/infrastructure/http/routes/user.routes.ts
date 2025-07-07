@@ -1,8 +1,17 @@
 import { Router } from 'express';
+
 import UserController from '../controllers/UserController.js';
 import UserService from '../../../application/services/UserService.js';
 import UserRepository from '../../../application/repositories/UserRepository.js';
 import checkAuthentication from '../middlewares/auth.middleware.js';
+import validate from '../middlewares/validate.middleware.js';
+import {
+  createUserSchema,
+  loginUserSchema,
+  updatePasswordSchema,
+  updateUserSchema,
+} from '../validations/user.schema.js';
+import authorizedRoles from '../middlewares/authorizedRoles.middleware.js';
 
 const userRouter = Router();
 
@@ -12,30 +21,39 @@ const userService = new UserService(userRepository);
 
 const userController = new UserController(userService);
 
-userRouter.post('/register', (req, res, next) =>
-  userController.create(req, res, next),
+userRouter.post(
+  '/users/register',
+  validate(createUserSchema),
+  userController.create.bind(userController),
 );
 
-userRouter.post('/login', (req, res, next) =>
-  userController.login(req, res, next),
+userRouter.post(
+  '/users/login',
+  validate(loginUserSchema),
+  userController.login.bind(userController),
 );
 
-userRouter.post('/logout', (req, res, next) =>
-  userController.logout(req, res, next),
-);
-
-userRouter.get('/users', checkAuthentication, (req, res, next) =>
-  userController.findAll(req, res, next),
-);
-
-userRouter.get('/users/update-profile', checkAuthentication, (req, res, next) =>
-  userController.updateProfile(req, res, next),
-);
+userRouter.post('/users/logout', userController.logout.bind(userController));
 
 userRouter.get(
+  '/users',
+  checkAuthentication,
+  authorizedRoles('admin', 'superadmin'),
+  userController.findAll.bind(userController),
+);
+
+userRouter.patch(
+  '/users/update-profile',
+  checkAuthentication,
+  validate(updateUserSchema),
+  userController.updateProfile.bind(userController),
+);
+
+userRouter.put(
   '/users/update-password',
   checkAuthentication,
-  (req, res, next) => userController.updatePassword(req, res, next),
+  validate(updatePasswordSchema),
+  userController.updatePassword.bind(userController),
 );
 
 export default userRouter;

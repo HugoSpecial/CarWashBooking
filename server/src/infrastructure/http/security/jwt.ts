@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken';
+
 import { UserDocument } from '../../db/models/user.model.js';
+import { ACCESS_TOKEN_SECRET_KEY } from '../../config/config.js';
 
 function createAccessToken(user: UserDocument): string {
-  return jwt.sign(
-    { userId: user._id },
-    process.env.ACCESS_TOKEN_SECRET_KEY as string,
-    { expiresIn: '1h' },
-  );
+  return jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET_KEY, {
+    expiresIn: '1h',
+  });
 }
 
 export { createAccessToken };

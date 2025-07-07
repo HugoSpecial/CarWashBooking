@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
+import UserService from '../../../application/services/UserService.js';
+import setTokenCookie from '../security/cookies.js';
 import {
   CreateUserDTO,
   LoginUserDTO,
   UpdatePasswordDTO,
   UpdateUserDTO,
-} from '../../../application/dtos/UserDTOs.js';
-import UserService from '../../../application/services/UserService.js';
-import setTokenCookie from '../security/cookies.js';
+} from '../validations/user.schema.js';
 
 class UserController {
   constructor(private readonly userService: UserService) {}

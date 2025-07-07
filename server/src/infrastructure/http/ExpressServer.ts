@@ -11,7 +11,7 @@ import setupLogger from '../setup/setupLogger.js';
 import errorHandler from './middlewares/error.middleware.js';
 import logger from '../logger/winstonLogger.js';
 
-process.loadEnvFile();
+import { PORT } from '../config/config.js';
 
 /**
  * Configure express server
@@ -60,7 +60,7 @@ class ExpressServer {
   }
 
   public listen() {
-    this.app.listen(process.env.PORT, () => {
+    this.app.listen(PORT, () => {
       logger.info('Server running');
     });
   }

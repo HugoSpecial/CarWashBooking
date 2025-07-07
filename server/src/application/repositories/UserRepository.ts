@@ -1,7 +1,7 @@
 import UserModel, {
   UserDocument,
 } from '../../infrastructure/db/models/user.model.js';
-import { CreateUserDTO } from '../dtos/UserDTOs.js';
+import { CreateUserDTO } from '../../infrastructure/http/validations/user.schema.js';
 
 class UserRepository {
   public async save(data: CreateUserDTO): Promise<UserDocument> {

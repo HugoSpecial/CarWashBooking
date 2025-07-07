@@ -1,8 +1,7 @@
 import mongoose, { Connection, MongooseError } from 'mongoose';
 
 import logger from '../logger/winstonLogger.js';
-import AppError from '../errors/AppError.js';
-import { StatusCodes } from 'http-status-codes';
+import { MONGO_URL } from '../config/config.js';
 
 class MongoService {
   private connection: Connection | null = null;
@@ -17,15 +16,6 @@ class MongoService {
     if (this.isConnected()) {
       logger.warn('MongoDB already connected');
       return;
-    }
-
-    const url = process.env.MONGO_URL;
-
-    if (!url) {
-      throw new AppError(
-        'MONGO_URL environment variable is not set',
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
     }
 
     try {
@@ -44,7 +34,7 @@ class MongoService {
         logger.warn('MongoDB connection lost');
       });
 
-      await mongoose.connect(url);
+      await mongoose.connect(MONGO_URL);
 
       this.connection = mongoose.connection;
     } catch (error) {

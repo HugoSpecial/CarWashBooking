@@ -1,9 +1,11 @@
 import { Response, CookieOptions } from 'express';
 
+import { NODE_ENV } from '../../config/config.js';
+
 function setTokenCookie(token: string, res: Response) {
   const options: CookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: NODE_ENV === 'production',
     sameSite: 'strict',
     maxAge: 1000 * 60 * 60,
     path: '/',

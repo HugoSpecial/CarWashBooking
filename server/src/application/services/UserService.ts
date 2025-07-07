@@ -3,13 +3,13 @@ import { compare, hash } from 'bcrypt';
 
 import { UserDocument } from '../../infrastructure/db/models/user.model.js';
 import AppError from '../../infrastructure/errors/AppError.js';
+import UserRepository from '../repositories/UserRepository.js';
+import { createAccessToken } from '../../infrastructure/http/security/jwt.js';
 import {
   CreateUserDTO,
   LoginUserDTO,
   UpdateUserDTO,
-} from '../dtos/UserDTOs.js';
-import UserRepository from '../repositories/UserRepository.js';
-import { createAccessToken } from '../../infrastructure/http/security/jwt.js';
+} from '../../infrastructure/http/validations/user.schema.js';
 
 class UserService {
   constructor(private readonly userRepository: UserRepository) {}

@@ -1,11 +1,13 @@
 import { model, Document, Schema } from 'mongoose';
 
+export type UserRole = 'user' | 'admin' | 'superadmin';
+
 export interface UserDocument extends Document {
   name: string;
   email: string;
   password: string;
   photo: string;
-  role: 'user' | 'admin';
+  role: UserRole;
 }
 
 const userSchema = new Schema<UserDocument>({
