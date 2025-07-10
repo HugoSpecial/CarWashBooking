@@ -11,7 +11,7 @@ import {
   updatePasswordSchema,
   updateUserSchema,
 } from '../validations/user.schema.js';
-import authorizedRoles from '../middlewares/authorizedRoles.middleware.js';
+import authorizedRoles from '../middlewares/authorized-roles.middleware.js';
 
 const userRouter = Router();
 
@@ -54,6 +54,12 @@ userRouter.put(
   checkAuthentication,
   validate(updatePasswordSchema),
   userController.updatePassword.bind(userController),
+);
+
+userRouter.get(
+  '/users/me',
+  checkAuthentication,
+  userController.getUserInfo.bind(userController),
 );
 
 export default userRouter;

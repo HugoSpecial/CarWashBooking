@@ -45,8 +45,6 @@ class ExpressServer {
     setupCors(this.app);
 
     setupLogger(this.app);
-
-    this.app.use(errorHandler);
   }
 
   private initRoutes() {
@@ -57,6 +55,8 @@ class ExpressServer {
     router.get('/health-check', healthMonitoring.check.bind(healthMonitoring));
 
     this.app.use('/api/v1', router, userRouter);
+
+    this.app.use(errorHandler);
   }
 
   public listen() {

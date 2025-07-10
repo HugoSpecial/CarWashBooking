@@ -1,8 +1,6 @@
-import { StatusCodes } from 'http-status-codes';
 import { compare, hash } from 'bcrypt';
 
 import { UserDocument } from '../../infrastructure/db/models/user.model.js';
-import AppError from '../../infrastructure/errors/AppError.js';
 import UserRepository from '../repositories/UserRepository.js';
 import { createAccessToken } from '../../infrastructure/http/security/jwt.js';
 import {
@@ -10,6 +8,8 @@ import {
   LoginUserDTO,
   UpdateUserDTO,
 } from '../../infrastructure/http/validations/user.schema.js';
+import BadRequestError from '../../infrastructure/errors/BadRequestError.js';
+import NotFoundError from '../../infrastructure/errors/NotFoundError.js';
 
 class UserService {
   constructor(private readonly userRepository: UserRepository) {}
@@ -46,12 +46,11 @@ class UserService {
   public async login(data: LoginUserDTO): Promise<string> {
     const userExists = await this.findByEmail(data.email);
 
-    if (!userExists) throw new AppError('Invalid email', StatusCodes.NOT_FOUND);
+    if (!userExists) throw new NotFoundError('Invalid email.');
 
     const passwordMatch = await compare(data.password, userExists.password);
 
-    if (!passwordMatch)
-      throw new AppError('Incorrect password', StatusCodes.BAD_REQUEST);
+    if (!passwordMatch) throw new BadRequestError('Incorrect password.');
 
     const accessToken = createAccessToken(userExists);
 
@@ -72,12 +71,11 @@ class UserService {
   ): Promise<UserDocument | null> {
     const user = await this.userRepository.findById(userId);
 
-    if (!user) throw new AppError('Invalid email', StatusCodes.NOT_FOUND);
+    if (!user) throw new NotFoundError('Invalid email.');
 
     const isMatch = await compare(oldPassword, user.password);
 
-    if (!isMatch)
-      throw new AppError('Old password is incorrect', StatusCodes.BAD_REQUEST);
+    if (!isMatch) throw new BadRequestError('Old password is incorrect.');
 
     const hashedPassword = await hash(newPassword, 10);
 

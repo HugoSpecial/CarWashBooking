@@ -1,7 +1,6 @@
 import MongoService from './infrastructure/db/connection.js';
 import ExpressServer from './infrastructure/http/ExpressServer.js';
 import logger from './infrastructure/logger/winstonLogger.js';
-//import "./types/express";
 
 /**
  * Initialize server

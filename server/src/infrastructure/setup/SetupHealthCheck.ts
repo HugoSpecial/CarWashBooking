@@ -8,7 +8,7 @@ import AppError from '../errors/AppError.js';
 class SetupHealthCheck {
   constructor(private readonly mongoConnection: MongoService) {}
 
-  public async check(_: Request, res: Response) {
+  public async check(_req: Request, res: Response) {
     try {
       const [dbStatus] = await Promise.all([this.checkDatabase()]);
 
