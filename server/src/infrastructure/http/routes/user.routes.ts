@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
 import UserController from '../controllers/UserController.js';
-import UserService from '../../../application/services/UserService.js';
-import UserRepository from '../../../application/repositories/UserRepository.js';
+import UserService from '../../../application/user/implementation/UserService.js';
+import UserRepository from '../../../application/user/implementation/UserRepository.js';
 import checkAuthentication from '../middlewares/auth.middleware.js';
 import validate from '../middlewares/validate.middleware.js';
 import {
@@ -12,6 +12,7 @@ import {
   updateUserSchema,
 } from '../validations/user.schema.js';
 import authorizedRoles from '../middlewares/authorized-roles.middleware.js';
+import upload from '../middlewares/multer.middleware.js';
 
 const userRouter = Router();
 
@@ -23,6 +24,7 @@ const userController = new UserController(userService);
 
 userRouter.post(
   '/users/register',
+  upload.single('photo'),
   validate(createUserSchema),
   userController.create.bind(userController),
 );
@@ -45,6 +47,7 @@ userRouter.get(
 userRouter.patch(
   '/users/update-profile',
   checkAuthentication,
+  upload.single('photo'),
   validate(updateUserSchema),
   userController.updateProfile.bind(userController),
 );

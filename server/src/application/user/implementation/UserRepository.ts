@@ -1,9 +1,10 @@
 import UserModel, {
   UserDocument,
-} from '../../infrastructure/db/models/user.model.js';
-import { CreateUserDTO } from '../../infrastructure/http/validations/user.schema.js';
+} from '../../../infrastructure/db/models/user.model.js';
+import { CreateUserDTO } from '../../../infrastructure/http/validations/user.schema.js';
+import IUserRepository from '../interfaces/IUserRepository.js';
 
-class UserRepository {
+class UserRepository implements IUserRepository {
   public async save(data: CreateUserDTO): Promise<UserDocument> {
     const user = new UserModel(data);
 

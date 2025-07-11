@@ -16,6 +16,16 @@ export const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
+
+  UPLOADCARE_SECRET_KEY: z
+    .string()
+    .min(1, 'Uploadcare secret key is required.'),
+
+  SALT_ROUNDS: z
+    .string()
+    .regex(/^\d+$/, 'SALT_ROUNDS must be a number.')
+    .default('10')
+    .transform(Number),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

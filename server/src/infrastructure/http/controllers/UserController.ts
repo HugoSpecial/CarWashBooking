@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import UserService from '../../../application/services/UserService.js';
+import UserService from '../../../application/user/implementation/UserService.js';
 import setTokenCookie from '../security/cookies.js';
 import {
   CreateUserDTO,
@@ -20,11 +20,13 @@ class UserController {
     next: NextFunction,
   ): Promise<void> {
     const data = req.body as CreateUserDTO;
+    const photo = req.file;
 
     logger.info(`User registration attempt with email: ${data.email}`);
 
     try {
-      const user = await this.userService.create(data);
+      const user = await this.userService.create(data, photo);
+
       logger.info(`User registered successfully: ${user.email}`);
 
       res.status(StatusCodes.OK).json(user);
@@ -63,6 +65,7 @@ class UserController {
     next: NextFunction,
   ): Promise<void> {
     logger.info('Fetching all users');
+
     try {
       const users = await this.userService.findAll();
 
@@ -77,6 +80,7 @@ class UserController {
 
   public logout(_req: Request, res: Response, next: NextFunction): void {
     logger.info('Logout attempt');
+
     try {
       res.clearCookie('accessToken');
 
@@ -97,16 +101,18 @@ class UserController {
     next: NextFunction,
   ): Promise<void> {
     const userId = req.user!.userId;
-    const { name, email, photo } = req.body as UpdateUserDTO;
+
+    const data = req.body as UpdateUserDTO;
+    const photo = req.file;
 
     logger.info(`Update profile attempt for userId: ${userId}`);
 
     try {
-      const updatedUser = await this.userService.updateProfile(userId, {
-        name,
-        email,
+      const updatedUser = await this.userService.updateProfile(
+        userId,
+        data,
         photo,
-      });
+      );
 
       logger.info(`Profile updated successfully for userId: ${userId}`);
 

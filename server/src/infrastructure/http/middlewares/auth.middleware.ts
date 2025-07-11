@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import UserService from '../../../application/services/UserService.js';
-import UserRepository from '../../../application/repositories/UserRepository.js';
+import UserService from '../../../application/user/implementation/UserService.js';
+import UserRepository from '../../../application/user/implementation/UserRepository.js';
 import { ACCESS_TOKEN_SECRET_KEY } from '../../config/config.js';
 import { UserRole } from '../../db/models/user.model.js';
-import UnathorizedError from '../../errors/UnathorizedError.js';
+import UnauthorizedError from '../../errors/UnauthorizedError.js';
 
 const userRepository = new UserRepository();
 
@@ -19,7 +19,7 @@ async function checkAuthentication(
   const accessToken = req.cookies.accessToken;
 
   try {
-    if (!accessToken) throw new UnathorizedError('You are not logged in!');
+    if (!accessToken) throw new UnauthorizedError('You are not logged in!');
 
     const decoded = jwt.verify(
       accessToken as string,
@@ -27,11 +27,11 @@ async function checkAuthentication(
     ) as { userId: string; role: UserRole };
 
     if (!decoded)
-      throw new UnathorizedError('You do not have access to this resource!');
+      throw new UnauthorizedError('You do not have access to this resource!');
 
     const user = await userService.findById(decoded.userId);
 
-    if (!user) throw new UnathorizedError('Invalid user!');
+    if (!user) throw new UnauthorizedError('Invalid user!');
 
     req.user = {
       userId: decoded.userId,

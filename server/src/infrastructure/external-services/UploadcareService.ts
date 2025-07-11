@@ -1,10 +1,12 @@
 import { UploadClient } from '@uploadcare/upload-client';
 
+import { UPLOADCARE_SECRET_KEY } from '../config/config.js';
+
 class UploadcareService {
   private client: UploadClient;
 
-  constructor(public readonly publicKey: string) {
-    this.client = new UploadClient({ publicKey });
+  constructor() {
+    this.client = new UploadClient({ publicKey: UPLOADCARE_SECRET_KEY });
   }
 
   public async uploadFile(buffer: Buffer, fileName: string) {

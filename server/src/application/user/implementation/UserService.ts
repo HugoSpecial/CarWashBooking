@@ -1,25 +1,46 @@
 import { compare, hash } from 'bcrypt';
 
-import { UserDocument } from '../../infrastructure/db/models/user.model.js';
-import UserRepository from '../repositories/UserRepository.js';
-import { createAccessToken } from '../../infrastructure/http/security/jwt.js';
+import { UserDocument } from '../../../infrastructure/db/models/user.model.js';
+import UserRepository from './UserRepository.js';
+import { createAccessToken } from '../../../infrastructure/http/security/jwt.js';
 import {
   CreateUserDTO,
   LoginUserDTO,
   UpdateUserDTO,
-} from '../../infrastructure/http/validations/user.schema.js';
-import BadRequestError from '../../infrastructure/errors/BadRequestError.js';
-import NotFoundError from '../../infrastructure/errors/NotFoundError.js';
+} from '../../../infrastructure/http/validations/user.schema.js';
+import BadRequestError from '../../../infrastructure/errors/BadRequestError.js';
+import NotFoundError from '../../../infrastructure/errors/NotFoundError.js';
+import UploadcareService from '../../../infrastructure/external-services/UploadcareService.js';
+import { SALT_ROUNDS } from '../../../infrastructure/config/config.js';
 
 class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  private readonly uploadcareService: UploadcareService;
 
-  public async create(data: CreateUserDTO): Promise<UserDocument> {
-    const hashedPassword = await hash(data.password, 10);
+  constructor(private readonly userRepository: UserRepository) {
+    this.uploadcareService = new UploadcareService();
+  }
+
+  public async create(
+    data: CreateUserDTO,
+    photo?: Express.Multer.File,
+  ): Promise<UserDocument> {
+    const hashedPassword = await hash(data.password, SALT_ROUNDS);
+
+    let photoUrl: string | undefined;
+
+    if (photo) {
+      const fileInfo = await this.uploadcareService.uploadFile(
+        photo.buffer,
+        photo.originalname,
+      );
+
+      photoUrl = fileInfo.cdnUrl;
+    }
 
     const user = await this.userRepository.save({
       ...data,
       password: hashedPassword,
+      ...(photoUrl && { photo: photoUrl }),
     });
 
     return user;
@@ -60,8 +81,25 @@ class UserService {
   public async updateProfile(
     userId: string,
     data: UpdateUserDTO,
+    photo?: Express.Multer.File,
   ): Promise<UserDocument | null> {
-    return await this.userRepository.update(userId, data);
+    let photoUrl: string | undefined;
+
+    if (photo) {
+      const fileInfo = await this.uploadcareService.uploadFile(
+        photo.buffer,
+        photo.originalname,
+      );
+
+      photoUrl = fileInfo.cdnUrl;
+    }
+
+    const updateData = {
+      ...data,
+      ...(photoUrl && { photo: photoUrl }),
+    };
+
+    return await this.userRepository.update(userId, updateData);
   }
 
   public async changePassword(
@@ -77,7 +115,7 @@ class UserService {
 
     if (!isMatch) throw new BadRequestError('Old password is incorrect.');
 
-    const hashedPassword = await hash(newPassword, 10);
+    const hashedPassword = await hash(newPassword, SALT_ROUNDS);
 
     return await this.userRepository.update(userId, {
       password: hashedPassword,

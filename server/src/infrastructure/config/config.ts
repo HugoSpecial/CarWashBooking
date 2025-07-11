@@ -11,5 +11,11 @@ if (!parsed.success) {
   process.exit(1);
 }
 
-export const { PORT, MONGO_URL, ACCESS_TOKEN_SECRET_KEY, NODE_ENV } =
-  parsed.data;
+export const {
+  PORT,
+  MONGO_URL,
+  ACCESS_TOKEN_SECRET_KEY,
+  NODE_ENV,
+  UPLOADCARE_SECRET_KEY,
+  SALT_ROUNDS,
+} = parsed.data;

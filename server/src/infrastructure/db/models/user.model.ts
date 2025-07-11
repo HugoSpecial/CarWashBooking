@@ -24,10 +24,7 @@ const userSchema = new Schema<UserDocument>({
     type: String,
     required: true,
   },
-  photo: {
-    type: String,
-    required: true,
-  },
+  photo: String,
   role: {
     type: String,
     required: true,
