@@ -43,7 +43,9 @@ class MongoService {
     }
   }
 
-  public async close(): Promise<void> {
+  public async disconnect(): Promise<void> {
+    logger.info('Attempting to disconnect from MongoDB...');
+
     try {
       await mongoose.disconnect();
 
@@ -52,7 +54,7 @@ class MongoService {
 
       logger.info('MongoDB connection closed');
     } catch (error) {
-      logger.error('Failed to close connection');
+      logger.error('Failed to close connection', error);
       throw error;
     }
   }
