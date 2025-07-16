@@ -6,6 +6,8 @@ import setTokenCookie from '../security/cookies.js';
 import {
   CreateUserDTO,
   LoginUserDTO,
+  RequestResetPasswordDTO,
+  ResetPasswordDTO,
   UpdatePasswordDTO,
   UpdateUserDTO,
 } from '../validations/user.schema.js';
@@ -171,6 +173,42 @@ class UserController {
       next(error);
     }
   }
+
+  public async requestPasswordReset(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const { email } = req.body as RequestResetPasswordDTO;
+
+    try {
+      await this.userService.requestPasswordReset(email);
+
+      res
+        .status(StatusCodes.OK)
+        .json({ message: 'Password reset email sent.' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public resetPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    const { token, newPassword } = req.body as ResetPasswordDTO;
+
+    try {
+      await this.userService.resetPassword(token, newPassword);
+
+      res
+        .status(StatusCodes.OK)
+        .json({ message: 'Password has been reset successfully.' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default UserController;

@@ -12,19 +12,19 @@ class UserRepository implements IUserRepository {
   }
 
   public async findByEmail(email: string): Promise<UserDocument | null> {
-    const user = UserModel.findOne({ email: email });
+    const user = await UserModel.findOne({ email: email });
 
     return user;
   }
 
   public async findById(id: string): Promise<UserDocument | null> {
-    const user = UserModel.findById(id);
+    const user = await UserModel.findById(id);
 
     return user;
   }
 
-  public async findAll(): Promise<UserDocument[] | null> {
-    const users = UserModel.find();
+  public async findAll(): Promise<UserDocument[]> {
+    const users = await UserModel.find();
 
     return users;
   }

@@ -35,6 +35,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "nodemailer": "^7.0.5",
+    "nodemailer-express-handlebars": "^7.0.0",
     "uploadcare": "^0.4.8",
     "winston": "^3.17.0",
     "zod": "^3.25.75"
@@ -48,6 +49,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
+    "@types/nodemailer": "^6.4.17",
+    "@types/nodemailer-express-handlebars": "^4.0.5",
     "@types/uploadcare": "^0.4.4",
     "eslint": "^9.30.1",
     "eslint-config-prettier": "^10.1.5",

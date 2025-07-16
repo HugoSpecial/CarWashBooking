@@ -2,7 +2,11 @@ import { compare, hash } from 'bcrypt';
 
 import { UserDocument } from '../../../infrastructure/db/models/user.model.js';
 import UserRepository from './UserRepository.js';
-import { createAccessToken } from '../../../infrastructure/http/security/jwt.js';
+import {
+  createAccessToken,
+  createPasswordResetToken,
+  verifyPasswordResetToken,
+} from '../../../infrastructure/http/security/jwt.js';
 import {
   CreateUserDTO,
   LoginUserDTO,
@@ -12,12 +16,15 @@ import BadRequestError from '../../../infrastructure/errors/BadRequestError.js';
 import NotFoundError from '../../../infrastructure/errors/NotFoundError.js';
 import UploadcareService from '../../../infrastructure/external-services/UploadcareService.js';
 import { SALT_ROUNDS } from '../../../infrastructure/config/config.js';
+import MailerService from '../../../infrastructure/external-services/MailService.js';
 
 class UserService {
   private readonly uploadcareService: UploadcareService;
+  private readonly mailService: MailerService;
 
   constructor(private readonly userRepository: UserRepository) {
     this.uploadcareService = new UploadcareService();
+    this.mailService = new MailerService();
   }
 
   public async create(
@@ -73,7 +80,10 @@ class UserService {
 
     if (!passwordMatch) throw new BadRequestError('Incorrect password.');
 
-    const accessToken = createAccessToken(userExists);
+    const accessToken = createAccessToken(
+      String(userExists._id),
+      userExists.role,
+    );
 
     return accessToken;
   }
@@ -118,6 +128,42 @@ class UserService {
     const hashedPassword = await hash(newPassword, SALT_ROUNDS);
 
     return await this.userRepository.update(userId, {
+      password: hashedPassword,
+    });
+  }
+
+  public async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) throw new NotFoundError('Invalid email');
+
+    const token = createPasswordResetToken(String(user._id));
+
+    this.mailService.sendMail({
+      to: user.email,
+      subject: 'Reset your password',
+      template: 'reset-password',
+      context: {
+        name: user.name,
+        resetLink: `http://localhost:5000/api/v1/users/reset-password?token=${token}`,
+        appName: 'Car Wash',
+      },
+    });
+  }
+
+  public async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<void> {
+    const payload = verifyPasswordResetToken(token);
+
+    const user = await this.userRepository.findById(payload.userId);
+
+    if (!user) throw new NotFoundError('Invalid user.');
+
+    const hashedPassword = await hash(newPassword, SALT_ROUNDS);
+
+    await this.userRepository.update(String(user._id), {
       password: hashedPassword,
     });
   }

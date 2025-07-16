@@ -23,7 +23,20 @@ export const updatePasswordSchema = z.object({
   newPassword: z.string().min(6),
 });
 
+export const requestResetPasswordSchema = z.object({
+  email: z.string().email('Valid email is required.'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required.'),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters.'),
+});
+
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type LoginUserDTO = z.infer<typeof loginUserSchema>;
 export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 export type UpdatePasswordDTO = z.infer<typeof updatePasswordSchema>;
+export type RequestResetPasswordDTO = z.infer<
+  typeof requestResetPasswordSchema
+>;
+export type ResetPasswordDTO = z.infer<typeof resetPasswordSchema>;

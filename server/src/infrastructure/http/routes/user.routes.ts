@@ -8,6 +8,8 @@ import validate from '../middlewares/validate.middleware.js';
 import {
   createUserSchema,
   loginUserSchema,
+  requestResetPasswordSchema,
+  resetPasswordSchema,
   updatePasswordSchema,
   updateUserSchema,
 } from '../validations/user.schema.js';
@@ -63,6 +65,18 @@ userRouter.get(
   '/users/me',
   checkAuthentication,
   userController.getUserInfo.bind(userController),
+);
+
+userRouter.post(
+  '/users/request-password-reset',
+  validate(requestResetPasswordSchema),
+  userController.requestPasswordReset.bind(userController),
+);
+
+userRouter.post(
+  '/users/reset-password',
+  validate(resetPasswordSchema),
+  userController.resetPassword.bind(userController),
 );
 
 export default userRouter;
